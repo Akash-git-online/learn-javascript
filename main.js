@@ -89,24 +89,6 @@ function greetingHandler() {
     } else {
         greetingText = "Welcome!";
     }
-
-    const weatherCondition = "sunny";
-    const userLocation = "Dublin";
-    let temperature = 25;
-    let celsiusText = `The weather is ${weatherCondition} in ${userLocation} and it's ${temperature.toFixed(1)} outside.`;
-    let fahrText = `The weather is ${weatherCondition} in ${userLocation} and it's ${celciusToFahr(temperature).toFixed(1)} outside.`;
-
-    document.querySelector("#greeting").innerHTML = greetingText;
-    document.querySelector("p#weather").innerHTML = celsiusText;
-
-    //on click for radio button 
-    document.querySelector(".weather-group").addEventListener("click", function (e) {
-        if (e.target.id == "celsius") {
-            document.querySelector("p#weather").innerHTML = celsiusText;
-        } else if (e.target.id == "fahr") {
-            document.querySelector("p#weather").innerHTML = fahrText;
-        }
-    });
 }
 
 //taking system date
@@ -252,18 +234,37 @@ function footerHandler() {
 
 navigator.geolocation.getCurrentPosition(position => {
     let latitude = position.coords.latitude;
-    let longtitude = position.coords.longtitude;
+    let longtitude = position.coords.longitude;
+
     let url = weatherAPIURL
         .replace("{lat}", latitude)
         .replace("{lon}", longtitude)
         .replace("{API key}", weatherAPIKey);
 
-    //console.log(url);
+    console.log(url);
 
     fetch(url)
         .then(response => response.json())
-        .then(data => console.log(data));
+        .then(data => {
+            const weatherCondition = data.weather[0].description;
+            const userLocation = data.name;
+            let temperature = data.main.temp;
+            let celsiusText = `The weather is ${weatherCondition} in ${userLocation} and it's ${temperature.toFixed(1)} outside.`;
+            let fahrText = `The weather is ${weatherCondition} in ${userLocation} and it's ${celciusToFahr(temperature).toFixed(1)} outside.`;
+
+            document.querySelector("p#weather").innerHTML = celsiusText;
+
+            //on click for radio button 
+            document.querySelector(".weather-group").addEventListener("click", function (e) {
+                if (e.target.id == "celsius") {
+                    document.querySelector("p#weather").innerHTML = celsiusText;
+                } else if (e.target.id == "fahr") {
+                    document.querySelector("p#weather").innerHTML = fahrText;
+                }
+            });
+        });
 });
+
 
 //Page Load
 menuHandler();
